@@ -24,10 +24,10 @@ def main():
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     # Generate output files from payload
-    output_common_git_vars(packages_dict)
+    output_content_to_files(packages_dict)
 
 
-def output_common_git_vars(payload_dict):
+def output_content_to_files(payload_dict):
     write_var_file("PARSED_PACKAGES_ARRAY", payload_dict)
 
 

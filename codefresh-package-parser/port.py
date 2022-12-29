@@ -7,9 +7,12 @@ logger = logging.getLogger('port_client')
 
 
 def get_access_token(CLIENT_ID, CLIENT_SECRET):
-    credentials = {'clientId': CLIENT_ID, 'clientSecret': CLIENT_SECRET}
-    token_response = requests.post(f'{API_URL}/auth/access_token', json=credentials)
-    return token_response.json()['accessToken']
+    try:
+        credentials = {'clientId': CLIENT_ID, 'clientSecret': CLIENT_SECRET}
+        token_response = requests.post(f'{API_URL}/auth/access_token', json=credentials)
+        return token_response.json()['accessToken']
+    except Exception as err:
+        logger.error('Failed to get access token')
 
 
 def construct_headers(access_token):
