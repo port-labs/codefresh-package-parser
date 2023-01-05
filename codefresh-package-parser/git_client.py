@@ -4,7 +4,7 @@ from pathlib import Path
 
 import logging
 
-logger = logging.getLogger('package_parser:git_client')
+logger = logging.getLogger('package_parser.git_client')
 
 
 TOKEN_AUTH_HEADER = 'x-token-auth'

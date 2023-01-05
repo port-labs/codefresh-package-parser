@@ -3,17 +3,19 @@
 import json
 import os
 import logging
+import sys
 
 from port import get_access_token
 from git_client import clone_repo_and_map_files
+from log_utils import log_file_handler, log_stream_handler, formatter
 
 from utils import validate_and_load_env_vars
 
 from package_parser import parse_packages_based_on_manager_type
 
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO, encoding='utf-8')
+logging.basicConfig(handlers=[log_file_handler, log_stream_handler], level=logging.DEBUG)
 
-logger = logging.getLogger('package_parser:main')
+logger = logging.getLogger('package_parser.main')
 
 OUTPUT_DIR = "/tmp/packagevars/"
 

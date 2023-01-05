@@ -5,7 +5,7 @@ from port import get_port_entity, upsert_port_entity
 import xmltodict
 import logging
 
-logger = logging.getLogger('package_parser:parser')
+logger = logging.getLogger('package_parser.parser')
 
 
 PACKAGE_BLUEPRINT_IDENTIFIER = 'library'
@@ -28,9 +28,9 @@ def parse_packages_from_c_sharp_package_files(port_access_token, package_file_pa
     packages_results = []
     normalized_filters = normalize_package_filters(package_filters.split(','))
     for filter in normalized_filters:
-        print(f'Filter is: {filter}')
+        logger.info(f'Filter is: {filter}')
     for package_file_path in package_file_path_list:
-        print(f'Parsing packages from file: {package_file_path}')
+        logger.debug(f'Parsing packages from file: {package_file_path}')
         with open(package_file_path) as f:
             project_structure_dict = xmltodict.parse(f.read())
             packages_results = packages_results + parse_packages_from_c_sharp_proj(port_access_token, project_structure_dict, normalized_filters)
