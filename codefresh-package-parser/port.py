@@ -1,9 +1,10 @@
+import sys
 from consts import API_URL, USER_AGENT
 import requests
 import logging
 
 
-logger = logging.getLogger('port_client')
+logger = logging.getLogger('package_parser:port_client')
 
 
 def get_access_token(CLIENT_ID, CLIENT_SECRET):

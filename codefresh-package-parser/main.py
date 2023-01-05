@@ -2,24 +2,29 @@
 
 import json
 import os
+import logging
 
 from port import get_access_token
-from git_client import get_file_contents
+from git_client import clone_repo_and_map_files
 
 from utils import validate_and_load_env_vars
 
 from package_parser import parse_packages_based_on_manager_type
 
+logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO, encoding='utf-8')
+
+logger = logging.getLogger('package_parser:main')
+
 OUTPUT_DIR = "/tmp/packagevars/"
 
 
 def main():
-    REPO_URL, ACCESS_TOKEN, PORT_CLIENT_ID, PORT_CLIENT_SECRET, PACKAGE_MANAGER, PACKAGES_FILE_PATH, PACKAGE_FILTER_STRING = validate_and_load_env_vars()
-    packages_file_content = get_file_contents(REPO_URL, ACCESS_TOKEN, PACKAGES_FILE_PATH)
+    REPO_URL, ACCESS_TOKEN, PORT_CLIENT_ID, PORT_CLIENT_SECRET, PACKAGE_MANAGER, PACKAGES_FILE_FILTER, INTERNAL_PACKAGE_FILTERS = validate_and_load_env_vars()
+    package_file_path_list = clone_repo_and_map_files(REPO_URL, ACCESS_TOKEN, PACKAGES_FILE_FILTER)
     access_token = get_access_token(PORT_CLIENT_ID, PORT_CLIENT_SECRET)
     packages_dict = parse_packages_based_on_manager_type(
-        access_token, PACKAGE_MANAGER, packages_file_content, PACKAGE_FILTER_STRING)
-    print(packages_dict)
+        access_token, PACKAGE_MANAGER, package_file_path_list, INTERNAL_PACKAGE_FILTERS)
+    logger.info(f'packages_dict={packages_dict}')
     # Create output dir
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
@@ -41,7 +46,7 @@ def write_var_file(name, value):
     # Write the value to output file
     with open(OUTPUT_DIR + name, 'w') as file:
         file.write(value_str)
-    print(name + "=" + value_str)
+    logger.info(name + "=" + value_str)
 
 
 if __name__ == "__main__":

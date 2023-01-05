@@ -1,20 +1,24 @@
+import sys
 from git import Repo
+from pathlib import Path
 
 import logging
 
-logger = logging.getLogger('git_client')
+logger = logging.getLogger('package_parser:git_client')
+
 
 TOKEN_AUTH_HEADER = 'x-token-auth'
 
 
-def get_file_contents(repo_url, access_token, target_file_path):
+def clone_repo_and_map_files(repo_url, access_token, PACKAGES_FILE_FILTER):
     logger.info(f'Cloning from repo {repo_url}')
     repo = clone_target_repo(repo_url, access_token)
-    # GitPython offers a convenience method that allows you to use POSIX-like paths from the repo tree towards files in the repository
-    target_file = repo.tree() / target_file_path
-    target_contents = target_file.data_stream.read().decode()
     logger.info(f'Repo cloned')
-    return target_contents
+    file_path_list = []
+    for path in Path('./tmp').rglob(PACKAGES_FILE_FILTER):
+        file_path_list.append(path)
+        logger.info(path)
+    return file_path_list
 
 
 def clone_target_repo(repo_url, access_token):
