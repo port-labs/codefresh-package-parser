@@ -23,12 +23,12 @@ spec:
           - name: PORT_CLIENT_SECRET_KEY
             default: PORT_CLIENT_SECRET
           - name: PACKAGES_FILE_PATH
-          - name: PACKAGE_FILTER_STRING
+          - name: INTERNAL_PACKAGE_FILTER_STRING
             default: ""
       container:
         name: main
         imagePullPolicy: Always
-        image: public.ecr.aws/y8q1v8m0/codefresh-package-parser:1.0.0
+        image: public.ecr.aws/y8q1v8m0/codefresh-package-parser:1.1.0
         command:
           - python3
           - main.py
@@ -54,8 +54,8 @@ spec:
             value: "C_SHARP_PROJECT"
           - name: PACKAGES_FILE_PATH
             value: "{{ inputs.parameters.PACKAGES_FILE_PATH }}"
-          - name: PACKAGE_FILTER_STRING
-            value: "{{ inputs.parameters.PACKAGE_FILTER_STRING }}"
+          - name: INTERNAL_PACKAGE_FILTER_STRING
+            value: "{{ inputs.parameters.INTERNAL_PACKAGE_FILTER_STRING }}"
       outputs:
         parameters:
           - name: PARSED_PACKAGES_ARRAY
