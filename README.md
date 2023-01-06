@@ -35,8 +35,9 @@ The `package-parser` template gets the credentials required to clone a bitbucket
 - `PORT_CREDENTIALS_SECRET` - name of the secret to get the `CLIENT_ID` and `CLIENT_SECRET` from (default: `port-credentials`);
 - `PORT_CLIENT_ID_KEY` - key in the secret where the base64 encoded `PORT_CLIENT_ID` is stored (default: `PORT_CLIENT_ID`);
 - `PORT_CLIENT_SECRET_KEY` - key in the secret where the base64 encoded `PORT_CLIENT_SECRET` is stored (default `PORT_CLIENT_SECRET`);
-- `PACKAGES_FILE_PATH` - path to the packages definition file in the repository, for example: `apps/api/Port.API.Microservice.csproj`;
-- `PACKAGE_FILTER_STRING` - string to filter desired packages by (only packages matching the filter will be created in Port, case insensitive).
+- `PACKAGE_MANAGER` - the package manager type to use as a parsing template for the input files, available values are: `C_SHARP`, `NPM`, `JAVA`;
+- `PACKAGES_FILE_FILTER` - file filter to match package files by, for example: `*.csproj`;
+- `INTERNAL_PACKAGE_FILTERS` - a comma delimited string to mark internal packages (packages whose name matches the filter will be marked as internal), for example: "port,json".
 
 ### Outputs
 
@@ -61,10 +62,12 @@ The `package-parser` template gets the credentials required to clone a bitbucket
         value: PORT_CLIENT_ID
       - name: PORT_CLIENT_SECRET_KEY
         value: PORT_CLIENT_SECRET
-      - name: PACKAGES_FILE_PATH
-        value: apps/api/Port.API.Microservice.csproj
-      - name: PACKAGE_FILTER_STRING
-        value: "Port"
+      - name: PACKAGE_MANAGER
+        value: C_SHARP
+      - name: PACKAGES_FILE_FILTER
+        value: "*.csproj"
+      - name: INTERNAL_PACKAGE_FILTERS
+        value: "port,json"
 ```
 
 To access the workflow outputs, use `{{workflow.outputs.parameters.PARSED_PACKAGES_ARRAY}}`
