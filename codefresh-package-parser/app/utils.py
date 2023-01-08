@@ -33,7 +33,7 @@ def validate_and_load_env_vars():
 
 
 def normalize_identifier(original_identifier: str):
-    return original_identifier.replace('.', '-').replace('/', '-').replace('@', '').replace('^', '')
+    return original_identifier.replace('.', '-').replace('/', '-').replace('@', '').replace('^', '').replace(':', '-')
 
 
 def normalize_package_filters(package_filters: list[str]):

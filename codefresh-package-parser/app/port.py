@@ -40,7 +40,7 @@ def upsert_port_entity(access_token, blueprint_id, body):
         return res.json()
 
     logger.error(f'Entity {body["identifier"]} not created')
-    logger.error(f'Error: {res.json().get("error", None)}')
-    logger.error(f'Message: {res.json().get("message", None)}')
+    # logger.error(f'Error: {res.json().get("error", None)}')
+    # logger.error(f'Message: {res.json().get("message", None)}')
     logger.error(f'Complete response: {res.json()}')
     return None
