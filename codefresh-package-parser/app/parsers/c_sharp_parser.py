@@ -1,34 +1,19 @@
 import sys
-
-from utils import normalize_identifier, normalize_package_filters
-from port import get_port_entity, upsert_port_entity
-import xmltodict
+from app.utils import normalize_package_filters, normalize_identifier
+from app.port import upsert_port_entity
 import logging
-
-logger = logging.getLogger('package_parser.parser')
-
-
-PACKAGE_BLUEPRINT_IDENTIFIER = 'library'
-PACKAGE_RELEASE_BLUEPRINT_IDENTIFIER = 'library-release'
+import xmltodict
+from app.consts import PACKAGE_RELEASE_BLUEPRINT_IDENTIFIER, PACKAGE_BLUEPRINT_IDENTIFIER
+sys.path.append('../')
 
 
-def parse_packages_based_on_manager_type(port_access_token, package_manager_type, package_file_path_list, packages_filters):
-    if package_manager_type == 'C_SHARP':
-        logger.debug('Parsing C# packages')
-        return parse_packages_from_c_sharp_package_files(port_access_token, package_file_path_list, packages_filters)
-    elif package_manager_type == 'NPM':
-        logger.debug('Parsing NPM packages')
-        return []
-    elif package_manager_type == 'JAVA':
-        logger.debug('Parsing Java packages')
-        return []
+logger = logging.getLogger('packageparser.parser.c_sharp')
 
 
 def parse_packages_from_c_sharp_package_files(port_access_token, package_file_path_list, package_filters):
     packages_results = []
     normalized_filters = normalize_package_filters(package_filters.split(','))
-    for filter in normalized_filters:
-        logger.info(f'Filter is: {filter}')
+    logger.info(f'Filters are: {normalized_filters}')
     for package_file_path in package_file_path_list:
         logger.debug(f'Parsing packages from file: {package_file_path}')
         with open(package_file_path) as f:
@@ -60,6 +45,7 @@ def parse_packages_from_c_sharp_item_group(port_access_token, packages_array, pa
             internal_package = True
         logger.debug(f'Package {package_reference["@Include"]} is internal: {internal_package}')
         package_id = normalize_identifier(package_reference['@Include'])
+        logger.debug(f'Normalized package identifier: {package_id}')
         upsert_port_entity(port_access_token, PACKAGE_BLUEPRINT_IDENTIFIER, {
             'identifier': package_id,
             'title': package_id,
@@ -69,6 +55,7 @@ def parse_packages_from_c_sharp_item_group(port_access_token, packages_array, pa
             }
         })
         package_release_id = f'{package_id}_{normalize_identifier(package_reference["@Version"])}'
+        logger.debug(f'Normalized release identifier: {package_release_id}')
         upsert_port_entity(port_access_token, PACKAGE_RELEASE_BLUEPRINT_IDENTIFIER, {
             'identifier': package_release_id,
             'title': package_release_id,
@@ -82,9 +69,3 @@ def parse_packages_from_c_sharp_item_group(port_access_token, packages_array, pa
         })
         packages_results.append(package_release_id)
     return packages_results
-
-
-def check_if_package_exists_in_port(port_access_token, blueprint_identifier, package_identifier):
-    if get_port_entity(port_access_token, blueprint_identifier, package_identifier):
-        return True
-    return False

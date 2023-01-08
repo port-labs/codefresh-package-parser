@@ -5,13 +5,13 @@ import os
 import logging
 import sys
 
-from port import get_access_token
-from git_client import clone_repo_and_map_files
-from log_utils import log_file_handler, log_stream_handler, formatter
+from app.port import get_access_token
+from app.git_client import clone_repo_and_map_files
+from app.log_utils import log_file_handler, log_stream_handler
 
-from utils import validate_and_load_env_vars
+from app.utils import validate_and_load_env_vars
 
-from package_parser import parse_packages_based_on_manager_type
+from app.parsers.package_parser import parse_packages_based_on_manager_type
 
 logging.basicConfig(handlers=[log_file_handler, log_stream_handler], level=logging.DEBUG)
 
@@ -21,8 +21,8 @@ OUTPUT_DIR = "/tmp/packagevars/"
 
 
 def main():
-    REPO_URL, ACCESS_TOKEN, PORT_CLIENT_ID, PORT_CLIENT_SECRET, PACKAGE_MANAGER, PACKAGES_FILE_FILTER, INTERNAL_PACKAGE_FILTERS = validate_and_load_env_vars()
-    package_file_path_list = clone_repo_and_map_files(REPO_URL, ACCESS_TOKEN, PACKAGES_FILE_FILTER)
+    REPO_URL, GIT_PROVIDER_USERNAME, GIT_PROVIDER_APP_PASSWORD, PORT_CLIENT_ID, PORT_CLIENT_SECRET, PACKAGE_MANAGER, PACKAGES_FILE_FILTER, INTERNAL_PACKAGE_FILTERS = validate_and_load_env_vars()
+    package_file_path_list = clone_repo_and_map_files(REPO_URL, GIT_PROVIDER_USERNAME, GIT_PROVIDER_APP_PASSWORD, PACKAGES_FILE_FILTER)
     access_token = get_access_token(PORT_CLIENT_ID, PORT_CLIENT_SECRET)
     packages_dict = parse_packages_based_on_manager_type(
         access_token, PACKAGE_MANAGER, package_file_path_list, INTERNAL_PACKAGE_FILTERS)
