@@ -15,7 +15,7 @@ def parse_packages_from_c_sharp_package_files(port_credentials, package_file_pat
     normalized_filters = normalize_package_filters(package_filters.split(','))
     logger.info(f'Filters are: {normalized_filters}')
     for package_file_path in package_file_path_list:
-        logger.debug(f'Parsing packages from file: {package_file_path}')
+        logger.info(f'Parsing packages from file: {package_file_path}')
         with open(package_file_path) as f:
             project_structure_dict = xmltodict.parse(f.read())
             packages_results = packages_results + parse_packages_from_c_sharp_proj(port_credentials, project_structure_dict, normalized_filters)
