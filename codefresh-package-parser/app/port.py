@@ -41,6 +41,7 @@ def upsert_port_entity(port_credentials, blueprint_id, body):
     res = requests.post(f'{API_URL}/blueprints/{blueprint_id}/entities?upsert=true&merge=true', headers=headers, json=body)
     sema.release()
     if res.status_code == 200 or res.status_code == 201:
+        logger.info(f'Finished Creating {blueprint_id}: {body["identifier"]}')
         return res.json()
 
     if res.status_code == 401 and res.json()['error'] == 'JwtParseError':
