@@ -30,8 +30,9 @@ The `package-parser` template gets the credentials required to clone a bitbucket
 ### Inputs
 
 - `REPO_URL` - URL of the bitbucket repo to clone
-- `GIT_TOKEN_SECRET` - name of the secret to get the bitbucket access token from;
-- `GIT_TOKEN_SECRET_KEY` - key in the secret where the base64 encoded token is stored (default :`token`);
+- `GIT_PROVIDER_SECRET` - name of the secret to get the bitbucket username and app password from;
+- `GIT_PROVIDER_USERNAME_KEY` - key in the secret where the base64 encoded username is stored (default :`username`);
+- `GIT_PROVIDER_APP_PASSWORD_KEY` - key in the secret where the base64 encoded app password is stored (default :`app_password`);
 - `PORT_CREDENTIALS_SECRET` - name of the secret to get the `CLIENT_ID` and `CLIENT_SECRET` from (default: `port-credentials`);
 - `PORT_CLIENT_ID_KEY` - key in the secret where the base64 encoded `PORT_CLIENT_ID` is stored (default: `PORT_CLIENT_ID`);
 - `PORT_CLIENT_SECRET_KEY` - key in the secret where the base64 encoded `PORT_CLIENT_SECRET` is stored (default `PORT_CLIENT_SECRET`);
@@ -54,8 +55,12 @@ The `package-parser` template gets the credentials required to clone a bitbucket
     parameters:
       - name: REPO_URL
         value: bitbucket.org/port-labs/package-reporting-demo.git
-      - name: GIT_TOKEN_SECRET
-        value: bitbucket-access-token
+      - name: GIT_PROVIDER_SECRET
+        value: bitbucket-app-password
+      - name: GIT_PROVIDER_USERNAME_KEY
+        value: username
+      - name: GIT_PROVIDER_APP_PASSWORD_KEY
+        value: app_password
       - name: PORT_CREDENTIALS_SECRET
         value: port-credentials
       - name: PORT_CLIENT_ID_KEY
