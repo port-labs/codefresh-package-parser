@@ -38,6 +38,9 @@ def parse_packages_from_c_sharp_proj(port_access_token, project_structure_dict, 
 def parse_packages_from_c_sharp_item_group(port_access_token, packages_array, packages_filters: str):
     package_language = "C#"
     packages_results = []
+    # If there is only a single package in the .csproj file, the packages_array variable is a dictionary and not an array
+    if isinstance(packages_array, dict):
+        packages_array = [packages_array]
     for package_reference in packages_array:
         internal_package = False
         logger.debug(f'Looking at package: {package_reference["@Include"]}')
