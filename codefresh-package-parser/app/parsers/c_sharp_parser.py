@@ -1,6 +1,6 @@
 from app.parsers.utils import report_library_releases, construct_library_body, construct_library_release_body
 from app.utils import normalize_package_filters, normalize_identifier
-from app.port import upsert_port_entity
+from app.port import upsert_port_entity, get_all_blueprint_entities
 import logging
 import xmltodict
 from app.consts import PACKAGE_RELEASE_BLUEPRINT_IDENTIFIER, PACKAGE_BLUEPRINT_IDENTIFIER
@@ -37,6 +37,8 @@ def parse_packages_from_c_sharp_proj(port_credentials, project_structure_dict, p
 
 def parse_packages_from_c_sharp_item_group(port_credentials, packages_array, packages_filters: str):
     package_language = "C#"
+    existing_packages = get_all_blueprint_entities(port_credentials, PACKAGE_BLUEPRINT_IDENTIFIER)
+    existing_packages = [pkg['identifier'] for pkg in existing_packages]
     request_threads = []
     library_release_bodies = []
     # If there is only a single package in the .csproj file, the packages_array variable is a dictionary and not an array
@@ -51,10 +53,13 @@ def parse_packages_from_c_sharp_item_group(port_credentials, packages_array, pac
         package_id = normalize_identifier(package_reference['@Include'])
         logger.debug(f'Normalized package identifier: {package_id}')
         body = construct_library_body(package_id, package_language, internal_package)
-        logger.info(f'Creating library: {package_id}')
-        req_thread = threading.Thread(target=upsert_port_entity, args=(port_credentials, PACKAGE_BLUEPRINT_IDENTIFIER, body))
-        req_thread.start()
-        request_threads.append(req_thread)
+        if package_id not in existing_packages:
+            logger.info(f'Creating library: {package_id}')
+            req_thread = threading.Thread(target=upsert_port_entity, args=(port_credentials, PACKAGE_BLUEPRINT_IDENTIFIER, body))
+            req_thread.start()
+            request_threads.append(req_thread)
+        else:
+            logger.info(f'Skipping existing library: {package_id}')
         package_release_id = f'{package_id}_{normalize_identifier(package_reference["@Version"])}'
         logger.debug(f'Normalized release identifier: {package_release_id}')
         library_release_bodies.append(construct_library_release_body(package_release_id, package_reference["@Version"], package_id))

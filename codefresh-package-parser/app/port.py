@@ -25,6 +25,28 @@ def construct_headers(access_token):
     }
 
 
+def get_all_blueprint_entities(port_credentials, blueprint_id):
+    headers = construct_headers(access_token=port_credentials[ACCESS_TOKEN_KEY])
+
+    search_body = {
+        'combinator': 'and',
+        'rules': [
+            {
+                'property': '$blueprint',
+                'operator': '=',
+                'value': blueprint_id
+            }
+        ]
+    }
+
+    res = requests.post(f'{API_URL}/entities/search', headers=headers, json=search_body)
+    if res.status_code == 200:
+        return res.json()['entities']
+
+    logger.error(f'Failed to get blueprint entities')
+    return None
+
+
 def get_port_entity(port_credentials, blueprint_id, entity_id):
     headers = construct_headers(access_token=port_credentials[ACCESS_TOKEN_KEY])
     res = requests.get(f'{API_URL}/blueprints/{blueprint_id}/entities/{entity_id}', headers=headers)
