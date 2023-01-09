@@ -1,16 +1,16 @@
-import sys
+from app.parsers.utils import report_library_releases, construct_library_body, construct_library_release_body
 from app.utils import normalize_package_filters, normalize_identifier
 from app.port import upsert_port_entity
 import logging
 import xmltodict
 from app.consts import PACKAGE_RELEASE_BLUEPRINT_IDENTIFIER, PACKAGE_BLUEPRINT_IDENTIFIER
-sys.path.append('../')
+import threading
 
 
 logger = logging.getLogger('packageparser.parser.c_sharp')
 
 
-def parse_packages_from_c_sharp_package_files(port_access_token, package_file_path_list, package_filters):
+def parse_packages_from_c_sharp_package_files(port_credentials, package_file_path_list, package_filters):
     packages_results = []
     normalized_filters = normalize_package_filters(package_filters.split(','))
     logger.info(f'Filters are: {normalized_filters}')
@@ -18,11 +18,11 @@ def parse_packages_from_c_sharp_package_files(port_access_token, package_file_pa
         logger.debug(f'Parsing packages from file: {package_file_path}')
         with open(package_file_path) as f:
             project_structure_dict = xmltodict.parse(f.read())
-            packages_results = packages_results + parse_packages_from_c_sharp_proj(port_access_token, project_structure_dict, normalized_filters)
+            packages_results = packages_results + parse_packages_from_c_sharp_proj(port_credentials, project_structure_dict, normalized_filters)
     return packages_results
 
 
-def parse_packages_from_c_sharp_proj(port_access_token, project_structure_dict, package_filters):
+def parse_packages_from_c_sharp_proj(port_credentials, project_structure_dict, package_filters):
     packages_results = []
     item_groups_array = project_structure_dict['Project']['ItemGroup']
 
@@ -30,14 +30,15 @@ def parse_packages_from_c_sharp_proj(port_access_token, project_structure_dict, 
         if 'PackageReference' in item_group:
             packages_array = item_group['PackageReference']
             packages_results = packages_results + parse_packages_from_c_sharp_item_group(
-                port_access_token, packages_array, package_filters)
+                port_credentials, packages_array, package_filters)
 
     return packages_results
 
 
-def parse_packages_from_c_sharp_item_group(port_access_token, packages_array, packages_filters: str):
+def parse_packages_from_c_sharp_item_group(port_credentials, packages_array, packages_filters: str):
     package_language = "C#"
-    packages_results = []
+    request_threads = []
+    library_release_bodies = []
     # If there is only a single package in the .csproj file, the packages_array variable is a dictionary and not an array
     if isinstance(packages_array, dict):
         packages_array = [packages_array]
@@ -49,26 +50,13 @@ def parse_packages_from_c_sharp_item_group(port_access_token, packages_array, pa
         logger.debug(f'Package {package_reference["@Include"]} is internal: {internal_package}')
         package_id = normalize_identifier(package_reference['@Include'])
         logger.debug(f'Normalized package identifier: {package_id}')
-        upsert_port_entity(port_access_token, PACKAGE_BLUEPRINT_IDENTIFIER, {
-            'identifier': package_id,
-            'title': package_id,
-            "properties": {
-                "Language": package_language,
-                "Internal": internal_package
-            }
-        })
+        body = construct_library_body(package_id, package_language, internal_package)
+        req_thread = threading.Thread(target=upsert_port_entity, args=(port_credentials, PACKAGE_BLUEPRINT_IDENTIFIER, body))
+        req_thread.start()
+        request_threads.append(req_thread)
         package_release_id = f'{package_id}_{normalize_identifier(package_reference["@Version"])}'
         logger.debug(f'Normalized release identifier: {package_release_id}')
-        upsert_port_entity(port_access_token, PACKAGE_RELEASE_BLUEPRINT_IDENTIFIER, {
-            'identifier': package_release_id,
-            'title': package_release_id,
-            "properties": {
-                "Version": package_reference["@Version"]
-            },
-            "relations": {
-                "library": package_id
-            }
-
-        })
-        packages_results.append(package_release_id)
-    return packages_results
+        library_release_bodies.append(construct_library_release_body(package_release_id, package_reference["@Version"], package_id))
+    for thread in request_threads:
+        thread.join()
+    return report_library_releases(port_credentials, library_release_bodies)

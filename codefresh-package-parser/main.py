@@ -3,9 +3,9 @@
 import json
 import os
 import logging
-import sys
 
 from app.port import get_access_token
+from app.consts import CLIENT_ID_KEY, CLIENT_SECRET_KEY, ACCESS_TOKEN_KEY
 from app.git_client import clone_repo_and_map_files
 from app.log_utils import log_file_handler, log_stream_handler
 
@@ -22,10 +22,14 @@ OUTPUT_DIR = "/tmp/packagevars/"
 
 def main():
     REPO_URL, GIT_PROVIDER_USERNAME, GIT_PROVIDER_APP_PASSWORD, PORT_CLIENT_ID, PORT_CLIENT_SECRET, PACKAGE_MANAGER, PACKAGES_FILE_FILTER, INTERNAL_PACKAGE_FILTERS = validate_and_load_env_vars()
+    port_credentials = {
+        CLIENT_ID_KEY: PORT_CLIENT_ID,
+        CLIENT_SECRET_KEY: PORT_CLIENT_SECRET,
+        ACCESS_TOKEN_KEY: get_access_token(PORT_CLIENT_ID, PORT_CLIENT_SECRET)
+    }
     package_file_path_list = clone_repo_and_map_files(REPO_URL, GIT_PROVIDER_USERNAME, GIT_PROVIDER_APP_PASSWORD, PACKAGES_FILE_FILTER)
-    access_token = get_access_token(PORT_CLIENT_ID, PORT_CLIENT_SECRET)
     packages_dict = parse_packages_based_on_manager_type(
-        access_token, PACKAGE_MANAGER, package_file_path_list, INTERNAL_PACKAGE_FILTERS)
+        port_credentials, PACKAGE_MANAGER, package_file_path_list, INTERNAL_PACKAGE_FILTERS)
     logger.info(f'packages_dict={packages_dict}')
     # Create output dir
     os.makedirs(OUTPUT_DIR, exist_ok=True)
