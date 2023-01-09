@@ -51,6 +51,7 @@ def parse_packages_from_c_sharp_item_group(port_credentials, packages_array, pac
         package_id = normalize_identifier(package_reference['@Include'])
         logger.debug(f'Normalized package identifier: {package_id}')
         body = construct_library_body(package_id, package_language, internal_package)
+        logger.info(f'Creating library: {package_id}')
         req_thread = threading.Thread(target=upsert_port_entity, args=(port_credentials, PACKAGE_BLUEPRINT_IDENTIFIER, body))
         req_thread.start()
         request_threads.append(req_thread)

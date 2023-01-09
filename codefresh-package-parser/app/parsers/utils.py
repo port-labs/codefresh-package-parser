@@ -1,8 +1,11 @@
 import threading
+import logging
 
 from app.consts import PACKAGE_RELEASE_BLUEPRINT_IDENTIFIER
 
 from app.port import upsert_port_entity
+
+logger = logging.getLogger('packageparser.parser.utils')
 
 
 def construct_library_body(package_id, package_language, internal_package):
@@ -33,6 +36,7 @@ def report_library_releases(port_credentials, library_release_bodies):
     packages_results = []
     request_threads = []
     for library_release in library_release_bodies:
+        logger.info(f'Creating library-release: {library_release["identifier"]}')
         req_thread = threading.Thread(target=upsert_port_entity, args=(port_credentials, PACKAGE_RELEASE_BLUEPRINT_IDENTIFIER, library_release))
         req_thread.start()
         request_threads.append(req_thread)
