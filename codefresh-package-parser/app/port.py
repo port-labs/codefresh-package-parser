@@ -50,6 +50,8 @@ def upsert_port_entity(port_credentials, blueprint_id, body):
         sema.acquire()
         res = requests.post(f'{API_URL}/blueprints/{blueprint_id}/entities?upsert=true&merge=true', headers=headers, json=body)
         sema.release()
+        if res.status_code == 200 or res.status_code == 201:
+            return res.json()
 
     logger.error(f'Entity {body["identifier"]} not created')
     # logger.error(f'Error: {res.json().get("error", None)}')
