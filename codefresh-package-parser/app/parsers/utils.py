@@ -46,6 +46,7 @@ def report_library_releases(port_credentials, library_release_bodies):
             packages_results.append(library_release['identifier'])
         else:
             logger.info(f'Skipping existing library release: {library_release["identifier"]}')
+            packages_results.append(library_release['identifier'])
     for thread in request_threads:
         thread.join()
     return packages_results

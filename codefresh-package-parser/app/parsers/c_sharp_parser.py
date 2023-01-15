@@ -25,7 +25,8 @@ def parse_packages_from_c_sharp_package_files(port_credentials, package_file_pat
 def parse_packages_from_c_sharp_proj(port_credentials, project_structure_dict, package_filters):
     packages_results = []
     item_groups_array = project_structure_dict['Project']['ItemGroup']
-
+    if isinstance(item_groups_array, dict):
+        item_groups_array = [item_groups_array]
     for item_group in item_groups_array:
         if 'PackageReference' in item_group:
             packages_array = item_group['PackageReference']

@@ -10,6 +10,7 @@ from app.git_client import clone_repo_and_map_files
 from app.log_utils import log_file_handler, log_stream_handler
 
 from app.utils import validate_and_load_env_vars
+from app.port import upsert_port_entity, get_port_entity
 
 from app.parsers.package_parser import parse_packages_based_on_manager_type
 
@@ -28,14 +29,26 @@ def main():
         ACCESS_TOKEN_KEY: get_access_token(PORT_CLIENT_ID, PORT_CLIENT_SECRET)
     }
     package_file_path_list = clone_repo_and_map_files(REPO_URL, GIT_PROVIDER_USERNAME, GIT_PROVIDER_APP_PASSWORD, PACKAGES_FILE_FILTER)
-    packages_dict = parse_packages_based_on_manager_type(
+    packages_array = parse_packages_based_on_manager_type(
         port_credentials, PACKAGE_MANAGER, package_file_path_list, INTERNAL_PACKAGE_FILTERS)
-    logger.info(f'packages_dict={packages_dict}')
+    logger.info(f'packages_dict={packages_array}')
+    TARGET_BLUEPRINT_IDENTIFIER = os.getenv('TARGET_BLUEPRINT_IDENTIFIER', None)
+    TARGET_ENTITY_IDENTIFIER = os.getenv('TARGET_ENTITY_IDENTIFIER', None)
+    if TARGET_BLUEPRINT_IDENTIFIER and TARGET_ENTITY_IDENTIFIER:
+        curr_props = get_port_entity(port_credentials, TARGET_BLUEPRINT_IDENTIFIER, TARGET_ENTITY_IDENTIFIER)
+        body = {
+            'identifier': TARGET_ENTITY_IDENTIFIER,
+            'properties': curr_props['entity']['properties'],
+            'relations': {
+                'library-releases': packages_array
+            }
+        }
+        upsert_port_entity(port_credentials, TARGET_BLUEPRINT_IDENTIFIER, body)
     # Create output dir
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
     # Generate output files from payload
-    output_content_to_files(packages_dict)
+    output_content_to_files(packages_array)
 
 
 def output_content_to_files(payload_dict):

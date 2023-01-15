@@ -29,6 +29,11 @@ spec:
           - name: PACKAGES_FILE_FILTER
           - name: INTERNAL_PACKAGE_FILTERS
             default: ""
+          - name: TARGET_BLUEPRINT_IDENTIFIER
+            default: null
+          - name: TARGET_ENTITY_IDENTIFIER
+            default: null
+
       container:
         name: main
         imagePullPolicy: Always
@@ -65,6 +70,10 @@ spec:
             value: "{{ inputs.parameters.PACKAGES_FILE_FILTER }}"
           - name: INTERNAL_PACKAGE_FILTERS
             value: "{{ inputs.parameters.INTERNAL_PACKAGE_FILTERS }}"
+          - name: TARGET_BLUEPRINT_IDENTIFIER
+            value: "{{ inputs.parameters.TARGET_BLUEPRINT_IDENTIFIER }}"
+          - name: TARGET_ENTITY_IDENTIFIER
+            value: "{{ inputs.parameters.TARGET_ENTITY_IDENTIFIER }}"
       outputs:
         parameters:
           - name: PARSED_PACKAGES_ARRAY

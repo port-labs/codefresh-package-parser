@@ -35,6 +35,15 @@ spec:
                   value: apps/api/apps/api/Port.API.Microservice.csproj
                 - name: PACKAGE_FILTER_STRING
                   value: "Port"
+                - name: PACKAGE_MANAGER
+                  default: C_SHARP
+                - name: PACKAGES_FILE_FILTER
+                - name: INTERNAL_PACKAGE_FILTERS
+                  default: ""
+                - name: TARGET_BLUEPRINT_IDENTIFIER
+                  default: null
+                - name: TARGET_ENTITY_IDENTIFIER
+                  default: null
           - name: log-info
             dependencies: [parse-and-report-packages]
             template: log-info
