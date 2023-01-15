@@ -13,9 +13,11 @@ spec:
       inputs:
         parameters:
           - name: REPO_URL
-          - name: GIT_TOKEN_SECRET
-          - name: GIT_TOKEN_SECRET_KEY
-            default: token
+          - name: GIT_PROVIDER_SECRET
+          - name: GIT_PROVIDER_USERNAME_KEY
+            default: username
+          - name: GIT_PROVIDER_APP_PASSWORD_KEY
+            default: app_password
           - name: PORT_CREDENTIALS_SECRET
             default: port-credentials
           - name: PORT_CLIENT_ID_KEY
@@ -27,21 +29,31 @@ spec:
           - name: PACKAGES_FILE_FILTER
           - name: INTERNAL_PACKAGE_FILTERS
             default: ""
+          - name: TARGET_BLUEPRINT_IDENTIFIER
+            default: null
+          - name: TARGET_ENTITY_IDENTIFIER
+            default: null
+
       container:
         name: main
         imagePullPolicy: Always
-        image: public.ecr.aws/y8q1v8m0/codefresh-package-parser:1.1.0
+        image: public.ecr.aws/y8q1v8m0/codefresh-package-parser:1.2.0
         command:
           - python3
           - main.py
         env:
           - name: REPO_URL
             value: "{{ inputs.parameters.REPO_URL }}"
-          - name: ACCESS_TOKEN
+          - name: GIT_PROVIDER_USERNAME
             valueFrom:
               secretKeyRef:
-                name: "{{ inputs.parameters.GIT_TOKEN_SECRET }}"
-                key: "{{ inputs.parameters.GIT_TOKEN_SECRET_KEY }}"
+                name: "{{ inputs.parameters.GIT_PROVIDER_SECRET }}"
+                key: "{{ inputs.parameters.GIT_PROVIDER_USERNAME_KEY }}"
+          - name: GIT_PROVIDER_APP_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: "{{ inputs.parameters.GIT_PROVIDER_SECRET }}"
+                key: "{{ inputs.parameters.GIT_PROVIDER_APP_PASSWORD_KEY }}"
           - name: PORT_CLIENT_ID
             valueFrom:
               secretKeyRef:
@@ -58,6 +70,10 @@ spec:
             value: "{{ inputs.parameters.PACKAGES_FILE_FILTER }}"
           - name: INTERNAL_PACKAGE_FILTERS
             value: "{{ inputs.parameters.INTERNAL_PACKAGE_FILTERS }}"
+          - name: TARGET_BLUEPRINT_IDENTIFIER
+            value: "{{ inputs.parameters.TARGET_BLUEPRINT_IDENTIFIER }}"
+          - name: TARGET_ENTITY_IDENTIFIER
+            value: "{{ inputs.parameters.TARGET_ENTITY_IDENTIFIER }}"
       outputs:
         parameters:
           - name: PARSED_PACKAGES_ARRAY
